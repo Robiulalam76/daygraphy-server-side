@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 // middle were
@@ -60,10 +61,12 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/reviews', verifyJWT, async (req, res) => {
-            let query = {}
+        app.get('/reviews', async (req, res) => {
+            const id = req.query._id
+            const query = {}
             const cursor = reviewCollection.find(query);
-            const result = await cursor.toArray()
+            const reviews = await cursor.toArray()
+            const result = reviews.filter(review => review.serviceId === id)
             res.send(result)
         })
 
