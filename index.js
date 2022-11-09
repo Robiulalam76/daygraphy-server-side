@@ -35,18 +35,30 @@ async function run() {
         const serviceCollection = client.db('dayGraphy').collection('services')
         const reviewCollection = client.db('dayGraphy').collection('reviews')
 
+        // --------JWT--------
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res.send({ token })
         })
 
+        // --------Get All Services--------
         app.get('/services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
             const result = await cursor.toArray()
             res.send(result)
         })
+
+        // --------Post Service from site--------
+        app.post('/services', async (req, res) => {
+            const query = req.body
+            const result = await serviceCollection.insertOne(query);
+            console.log(result);
+            res.send(result)
+        })
+
+        // --------Get Latest 3 Services--------
         app.get('/latest-services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query).sort({ _id: -1 });
@@ -54,6 +66,7 @@ async function run() {
             res.send(result)
         })
 
+        // --------Service Id to findOne--------
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
@@ -61,12 +74,14 @@ async function run() {
             res.send(service)
         })
 
+        // --------Post User Review from site--------
         app.post('/reviews', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review)
             res.send(result)
         })
 
+        // --------Get One Review By Id--------
         app.get('/reviews', async (req, res) => {
             const id = req.query._id
             const query = {}
@@ -76,6 +91,7 @@ async function run() {
             res.send(result)
         })
 
+        // --------Delete Review--------
         app.delete('/reviews/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
@@ -83,6 +99,7 @@ async function run() {
             res.send(result)
         })
 
+        // --------Upadate Review--------
         app.put('/reviews/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
