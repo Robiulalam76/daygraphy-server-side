@@ -47,6 +47,12 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+        app.get('/latest-services', async (req, res) => {
+            const query = {};
+            const cursor = serviceCollection.find(query).sort({ _id: -1 });
+            const result = await cursor.limit(3).toArray()
+            res.send(result)
+        })
 
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
@@ -77,6 +83,19 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/reviews/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const message = req.body;
+            const option = { upsert: true };
+            const updatedMessage = {
+                $set: {
+                    message: message.message,
+                }
+            }
+            const result = await reviewCollection.updateOne(filter, updatedMessage, option);
+            res.send(result)
+        })
     }
     finally {
 
