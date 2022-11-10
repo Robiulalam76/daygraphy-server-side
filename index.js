@@ -51,7 +51,7 @@ async function run() {
         })
 
         // --------Post Service from site--------
-        app.post('/services', async (req, res) => {
+        app.post('/services', verifyJWT, async (req, res) => {
             const query = req.body
             const result = await serviceCollection.insertOne(query);
             res.send(result)
@@ -74,32 +74,24 @@ async function run() {
         })
 
         // --------Post User Review from site--------
-        app.post('/reviews', async (req, res) => {
+        app.post('/reviews', verifyJWT, async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review)
             res.send(result)
         })
 
-        // --------Get All Reviews--------
-        // app.get('/reviews', async (req, res) => {
-        //     const query = {}
-        //     const cursor = reviewCollection.find(query)
-        //     const result = await cursor.toArray()
-        //     res.send(result)
-        // })
-
         // --------Get One Review By Id--------
         app.get('/reviews', async (req, res) => {
             const id = req.query._id
             const query = {}
-            const cursor = reviewCollection.find(query);
+            const cursor = reviewCollection.find(query).sort({ _id: -1 });
             const reviews = await cursor.toArray()
             const result = reviews.filter(review => review.serviceId === id)
             res.send(result)
         })
 
         // --------Delete Review--------
-        app.delete('/reviews/:id', async (req, res) => {
+        app.delete('/reviews/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await reviewCollection.deleteOne(query);
@@ -107,7 +99,7 @@ async function run() {
         })
 
         // --------Upadate Review--------
-        app.put('/reviews/:id', async (req, res) => {
+        app.put('/reviews/:id', verifyJWT, async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
             const message = req.body;
